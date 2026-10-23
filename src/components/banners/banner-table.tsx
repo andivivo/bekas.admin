@@ -31,6 +31,21 @@ interface BannerTableProps {
   initialBanners: Banner[];
 }
 
+function hexToRgba(hex: string, alpha = 0.75): string {
+  let clean = (hex || "").replace("#", "").trim();
+  if (clean.length === 3) {
+    clean = clean.split("").map((c) => c + c).join("");
+  }
+  if (clean.length === 6) {
+    const num = parseInt(clean, 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hex;
+}
+
 export function BannerTable({ initialBanners }: BannerTableProps) {
   const [banners, setBanners] = React.useState<Banner[]>(
     [...initialBanners].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -217,31 +232,43 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
                     </button>
                   </div>
 
-                  {/* Gradient Card Preview */}
+                  {/* Banner Card Preview - Full Cover Background */}
                   <div
                     className="relative flex h-24 w-44 shrink-0 overflow-hidden rounded-xl p-3 text-white shadow-inner"
-                    style={{
-                      background: `linear-gradient(135deg, ${b.gradient_start || "#00c853"}, ${b.gradient_end || "#009624"})`,
-                    }}
+                    style={
+                      !b.image_url
+                        ? {
+                            background: `linear-gradient(135deg, ${b.gradient_start || "#00c853"}, ${b.gradient_end || "#009624"})`,
+                          }
+                        : undefined
+                    }
                   >
-                    <div className="flex flex-col justify-between z-10 w-full">
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-1.5 py-0.2 rounded w-fit">
-                        {b.tag}
-                      </span>
-                      <p className="text-xs font-bold line-clamp-2 leading-snug">
-                        {b.title}
-                      </p>
-                    </div>
                     {b.image_url && (
-                      <div className="absolute right-1 bottom-1 h-12 w-14 overflow-hidden rounded-lg opacity-85">
+                      <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={b.image_url}
                           alt={b.title}
-                          className="h-full w-full object-cover"
+                          className="absolute inset-0 h-full w-full object-cover"
                         />
-                      </div>
+                        {/* Overlay gradient 0.75 opacity */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: `linear-gradient(135deg, ${hexToRgba(b.gradient_start || "#00c853", 0.75)}, ${hexToRgba(b.gradient_end || "#009624", 0.75)})`,
+                          }}
+                        />
+                      </>
                     )}
+
+                    <div className="relative z-10 flex flex-col justify-between w-full h-full">
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-xs px-1.5 py-0.5 rounded w-fit border border-white/20 shadow-xs">
+                        {b.tag}
+                      </span>
+                      <p className="text-xs font-bold line-clamp-2 leading-snug drop-shadow-sm">
+                        {b.title}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Banner Info */}

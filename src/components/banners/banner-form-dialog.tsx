@@ -16,6 +16,21 @@ interface BannerFormDialogProps {
   onSuccess: (savedBanner: Banner) => void;
 }
 
+function hexToRgba(hex: string, alpha = 0.75): string {
+  let clean = (hex || "").replace("#", "").trim();
+  if (clean.length === 3) {
+    clean = clean.split("").map((c) => c + c).join("");
+  }
+  if (clean.length === 6) {
+    const num = parseInt(clean, 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hex;
+}
+
 export function BannerFormDialog({
   banner,
   open,
@@ -207,20 +222,42 @@ export function BannerFormDialog({
               Pratinjau Tampilan (Live Preview)
             </label>
             <div
-              className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-all"
-              style={{
-                background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
-              }}
+              className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-all min-h-[140px]"
+              style={
+                !imageUrl
+                  ? {
+                      background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
+                    }
+                  : undefined
+              }
             >
-              <div className="flex items-start justify-between gap-4">
+              {imageUrl && (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt="Banner Preview"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  {/* Overlay gradient 0.75 opacity */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(135deg, ${hexToRgba(gradientStart || "#00c853", 0.75)}, ${hexToRgba(gradientEnd || "#009624", 0.75)})`,
+                    }}
+                  />
+                </>
+              )}
+
+              <div className="relative z-10 flex items-start justify-between gap-4">
                 <div className="space-y-1.5 max-w-sm">
-                  <span className="inline-block rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-sm">
+                  <span className="inline-block rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-sm border border-white/20">
                     {tag || "PROMO SPESIAL"}
                   </span>
-                  <h4 className="text-xl font-bold tracking-tight">
+                  <h4 className="text-xl font-bold tracking-tight drop-shadow-sm">
                     {title || "Judul Banner Promosi"}
                   </h4>
-                  <p className="text-xs text-white/90 leading-relaxed">
+                  <p className="text-xs text-white/95 leading-relaxed drop-shadow-xs">
                     {subtitle || "Dapatkan potongan harga dan penawaran terbaik untuk gadget pilihanmu."}
                   </p>
                   <div className="pt-2">
@@ -229,17 +266,6 @@ export function BannerFormDialog({
                     </span>
                   </div>
                 </div>
-
-                {imageUrl && (
-                  <div className="h-20 w-24 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/10 backdrop-blur-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt="Banner Preview"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
               </div>
             </div>
           </div>
