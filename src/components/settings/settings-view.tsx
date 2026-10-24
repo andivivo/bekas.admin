@@ -218,7 +218,7 @@ export function SettingsView() {
                   </li>
                   <li className="flex items-center justify-between">
                     <span>Lapisan Redup (Dark Overlay):</span>
-                    <strong className="font-mono">50% Hitam (rgba(0,0,0,0.5))</strong>
+                    <strong className="font-mono">75% Hitam (rgba(0,0,0,0.75))</strong>
                   </li>
                   <li className="flex items-center justify-between">
                     <span>Tombol Aksi Kanan:</span>

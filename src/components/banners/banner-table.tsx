@@ -173,7 +173,7 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
             </Badge>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Format resmi: Lebar 280px × Tinggi 88px, background foto asli, overlay 50%, amber button.
+            Format resmi: Lebar 280px × Tinggi 88px, background foto asli, overlay 75%, amber button.
           </p>
         </div>
 
@@ -283,24 +283,28 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
                     />
                   )}
 
-                  {/* 50% Dark Overlay */}
+                  {/* 75% Dark Overlay */}
                   <div
                     className="absolute inset-0"
-                    style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                    style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
                   />
 
                   {/* Card Content */}
                   <div className="relative z-10 flex h-full w-full items-center justify-between p-[12px] text-white">
                     <div className="flex flex-col justify-center min-w-0 pr-2">
-                      <p
-                        className="text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
-                        style={{ letterSpacing: "-0.2px" }}
-                      >
-                        {banner.title}
-                      </p>
-                      <p className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1 drop-shadow-xs">
-                        {banner.subtitle}
-                      </p>
+                      {banner.title && (
+                        <p
+                          className="text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
+                          style={{ letterSpacing: "-0.2px" }}
+                        >
+                          {banner.title}
+                        </p>
+                      )}
+                      {banner.subtitle && (
+                        <p className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1 drop-shadow-xs">
+                          {banner.subtitle}
+                        </p>
+                      )}
                     </div>
 
                     <div className="shrink-0 self-end">
@@ -409,17 +413,21 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
 
                     <div
                       className="absolute inset-0"
-                      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                      style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
                     />
 
                     <div className="relative z-10 flex h-full w-full items-center justify-between p-[12px] text-white">
                       <div className="flex flex-col justify-center min-w-0 pr-2">
-                        <p className="text-[15px] font-bold text-white leading-tight truncate">
-                          {b.title}
-                        </p>
-                        <p className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1">
-                          {b.subtitle}
-                        </p>
+                        {b.title && (
+                          <p className="text-[15px] font-bold text-white leading-tight truncate">
+                            {b.title}
+                          </p>
+                        )}
+                        {b.subtitle && (
+                          <p className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1">
+                            {b.subtitle}
+                          </p>
+                        )}
                       </div>
 
                       <div className="shrink-0 self-end">
@@ -441,7 +449,7 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-                        {b.title}
+                        {b.title || <span className="text-slate-400 italic font-normal">(Tanpa Judul)</span>}
                       </h4>
                       <Badge
                         variant={b.is_active ? "success" : "secondary"}

@@ -20,7 +20,7 @@ export default async function BannersPage() {
           Manajemen Banner Marquee Aplikasi
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Kelola banner promosi bergerak (Marquee 280×88px dengan background foto asli dan overlay 50%) untuk beranda aplikasi bekasAja.
+          Kelola banner promosi bergerak (Marquee 280×88px dengan background foto asli dan overlay 75%) untuk beranda aplikasi bekasAja.
         </p>
       </div>
 

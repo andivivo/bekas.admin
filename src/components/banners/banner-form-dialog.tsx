@@ -172,11 +172,6 @@ export function BannerFormDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !subtitle.trim()) {
-      setError("Judul dan Subtitle banner wajib diisi.");
-      return;
-    }
-
     if (!imageUrl.trim()) {
       setError("Foto latar banner (Image URL) wajib diisi sesuai format Marquee aplikasi.");
       return;
@@ -245,7 +240,7 @@ export function BannerFormDialog({
                   {isEditing ? "Edit Banner Marquee Aplikasi" : "Tambah Banner Marquee Baru"}
                 </DialogTitle>
                 <DialogDescription>
-                  Format banner kontinu 280×88px dengan background foto asli dan overlay gelap 50%.
+                  Format banner kontinu 280×88px dengan background foto asli dan overlay gelap 75%.
                 </DialogDescription>
               </div>
             </div>
@@ -322,27 +317,31 @@ export function BannerFormDialog({
                   </div>
                 )}
 
-                {/* 2. Dark Overlay 50% */}
+                {/* 2. Dark Overlay 75% */}
                 <div
                   className="absolute inset-0"
-                  style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                  style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
                 />
 
                 {/* 3. Content: Left Text + Right Amber Button */}
                 <div className="relative z-10 flex h-full w-full items-center justify-between p-[12px] text-white">
                   {/* Left Column: Title & Subtitle */}
                   <div className="flex flex-col justify-center min-w-0 pr-2">
-                    <p
-                      className="text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
-                      style={{ letterSpacing: "-0.2px" }}
-                    >
-                      {title || "Judul Banner Marquee"}
-                    </p>
-                    <p
-                      className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1 drop-shadow-xs"
-                    >
-                      {subtitle || "Kondisi mulus 99%, siap pakai & negosiasi aman."}
-                    </p>
+                    {title && (
+                      <p
+                        className="text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
+                        style={{ letterSpacing: "-0.2px" }}
+                      >
+                        {title}
+                      </p>
+                    )}
+                    {subtitle && (
+                      <p
+                        className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1 drop-shadow-xs"
+                      >
+                        {subtitle}
+                      </p>
+                    )}
                   </div>
 
                   {/* Right Button: Amber #FFB020, black text, arrow icon */}
@@ -401,10 +400,9 @@ export function BannerFormDialog({
             {/* Title & Subtitle */}
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Judul Banner (Tebal, 15px, 1 Baris) <span className="text-rose-500">*</span>
+                Judul Banner (Tebal, 15px, 1 Baris)
               </label>
               <Input
-                required
                 maxLength={45}
                 placeholder="Contoh: Gadget & iPhone Bekas Mulus"
                 value={title}
@@ -415,10 +413,9 @@ export function BannerFormDialog({
 
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Sub Judul (12px, Maksimal 2 Baris) <span className="text-rose-500">*</span>
+                Sub Judul (12px, Maksimal 2 Baris)
               </label>
               <Input
-                required
                 maxLength={90}
                 placeholder="Contoh: Kondisi mulus 99%, baterai awet & siap pakai langsung"
                 value={subtitle}
