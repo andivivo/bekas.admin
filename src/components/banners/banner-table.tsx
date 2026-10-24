@@ -173,7 +173,7 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
             </Badge>
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Format resmi: Lebar 280px × Tinggi 88px, background foto asli, overlay 75%, amber button.
+            Format resmi: Lebar 280px × Tinggi 88px, background foto asli, overlay 25%, amber button.
           </p>
         </div>
 
@@ -283,10 +283,10 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
                     />
                   )}
 
-                  {/* 75% Dark Overlay */}
+                  {/* 25% Dark Overlay */}
                   <div
                     className="absolute inset-0"
-                    style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+                    style={{ backgroundColor: "rgba(0, 0, 0, 0.25)" }}
                   />
 
                   {/* Card Content */}
@@ -413,7 +413,7 @@ export function BannerTable({ initialBanners }: BannerTableProps) {
 
                     <div
                       className="absolute inset-0"
-                      style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+                      style={{ backgroundColor: "rgba(0, 0, 0, 0.25)" }}
                     />
 
                     <div className="relative z-10 flex h-full w-full items-center justify-between p-[12px] text-white">

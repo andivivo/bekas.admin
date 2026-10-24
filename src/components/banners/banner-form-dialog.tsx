@@ -240,7 +240,7 @@ export function BannerFormDialog({
                   {isEditing ? "Edit Banner Marquee Aplikasi" : "Tambah Banner Marquee Baru"}
                 </DialogTitle>
                 <DialogDescription>
-                  Format banner kontinu 280×88px dengan background foto asli dan overlay gelap 75%.
+                  Format banner kontinu 280×88px dengan background foto asli dan overlay gelap 25%.
                 </DialogDescription>
               </div>
             </div>
@@ -317,10 +317,10 @@ export function BannerFormDialog({
                   </div>
                 )}
 
-                {/* 2. Dark Overlay 75% */}
+                {/* 2. Dark Overlay 25% */}
                 <div
                   className="absolute inset-0"
-                  style={{ backgroundColor: "rgba(0, 0, 0, 0.75)" }}
+                  style={{ backgroundColor: "rgba(0, 0, 0, 0.25)" }}
                 />
 
                 {/* 3. Content: Left Text + Right Amber Button */}
