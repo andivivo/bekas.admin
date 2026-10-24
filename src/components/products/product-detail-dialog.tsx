@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRupiah, formatDate } from "@/lib/utils";
-import { Product } from "@/lib/types";
-import { MapPin, Tag, ShieldCheck, Check, AlertTriangle, Layers, Info } from "lucide-react";
+import { Product, getCategoryName } from "@/lib/types";
+import { MapPin, Tag, ShieldCheck, Check, AlertTriangle, Layers, Info, Handshake } from "lucide-react";
 
 interface ProductDetailDialogProps {
   product: Product | null;
@@ -57,7 +57,7 @@ export function ProductDetailDialog({
             </Badge>
           </div>
           <DialogDescription className="flex items-center gap-3 text-xs">
-            <span>Kategori: <strong>{product.category}</strong></span>
+            <span>Kategori: <strong>{getCategoryName(product.category)}</strong></span>
             <span>•</span>
             <span>Dibuat: {formatDate(product.created_at)}</span>
           </DialogDescription>
@@ -140,6 +140,19 @@ export function ProductDetailDialog({
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                 <Info className="h-4 w-4 text-slate-400" />
                 <span>Minus: <strong>{product.minus_info || "Tidak ada minus"}</strong></span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <Handshake className="h-4 w-4 text-slate-400" />
+                <span>
+                  Metode Transaksi:{" "}
+                  <strong>
+                    {product.transaction_method === "cod"
+                      ? "COD Janjian Saja"
+                      : product.transaction_method === "escrow"
+                      ? "Rekber Escrow Xendit Saja"
+                      : "Bisa COD & Rekber Escrow"}
+                  </strong>
+                </span>
               </div>
             </div>
 

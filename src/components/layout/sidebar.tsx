@@ -14,6 +14,7 @@ import {
   UserCog,
   Crown,
   Users,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -132,6 +133,13 @@ export function Sidebar({ className, onNavigate }: SidebarProps) {
       href: "/orders",
       icon: Receipt,
       badge: null,
+    },
+    {
+      title: "Pengaturan Aplikasi",
+      href: "/settings",
+      icon: Settings,
+      badge: "Sinkron",
+      badgeVariant: "success",
     },
     ...(adminRole === "super_admin"
       ? [

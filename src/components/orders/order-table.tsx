@@ -71,10 +71,23 @@ export function OrderTable({ initialOrders }: OrderTableProps) {
 
   const getOrderStatusBadge = (status: OrderStatus) => {
     switch (status) {
+      case "pending":
+        return <Badge variant="warning">Menunggu Konfirmasi</Badge>;
       case "waiting_payment":
         return <Badge variant="warning">Menunggu Bayar</Badge>;
+      case "waiting_cod":
+        return (
+          <Badge variant="info" className="bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+            COD (Janjian Ketemu)
+          </Badge>
+        );
       case "paid":
-        return <Badge variant="info">Sudah Dibayar</Badge>;
+      case "paid_in_escrow":
+        return (
+          <Badge variant="info" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            Dana Diamankan Escrow
+          </Badge>
+        );
       case "shipping":
         return <Badge variant="purple">Dalam Pengiriman</Badge>;
       case "completed":

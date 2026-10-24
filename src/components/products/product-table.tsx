@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Product, ProductStatus } from "@/lib/types";
+import { Product, ProductStatus, APP_CATEGORIES, getCategoryName } from "@/lib/types";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,7 @@ export function ProductTable({
   const [products, setProducts] = React.useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>(initialStatusFilter);
+  const [categoryFilter, setCategoryFilter] = React.useState<string>("all");
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 8;
 
@@ -90,9 +91,13 @@ export function ProductTable({
           ? p.status === "active" || p.status === "approved"
           : p.status === statusFilter);
 
-      return matchSearch && matchStatus;
+      const matchCategory =
+        categoryFilter === "all" ||
+        p.category?.toLowerCase() === categoryFilter.toLowerCase();
+
+      return matchSearch && matchStatus && matchCategory;
     });
-  }, [products, searchQuery, statusFilter]);
+  }, [products, searchQuery, statusFilter, categoryFilter]);
 
   // Pagination
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
@@ -103,7 +108,7 @@ export function ProductTable({
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, categoryFilter]);
 
   // Actions
   const handleApprove = async (productId: string) => {
@@ -236,15 +241,29 @@ export function ProductTable({
           ))}
         </div>
 
-        {/* Search Input */}
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Cari judul, kategori, kota..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-xs"
-          />
+        {/* Category & Search Toolbar */}
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-9 w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs text-slate-700 shadow-2xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+          >
+            {APP_CATEGORIES.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="Cari judul, kategori, kota..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 text-xs"
+            />
+          </div>
         </div>
       </div>
 
@@ -311,12 +330,21 @@ export function ProductTable({
                     {/* Category & Condition */}
                     <TableCell>
                       <div className="flex flex-col gap-1 items-start">
-                        <Badge variant="secondary" className="capitalize text-xs">
-                          {p.category}
+                        <Badge variant="secondary" className="text-xs">
+                          {getCategoryName(p.category)}
                         </Badge>
                         <span className="text-[11px] text-slate-500">
                           Kondisi: {p.condition}
                         </span>
+                        {p.transaction_method && (
+                          <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                            {p.transaction_method === "cod"
+                              ? "• COD Saja"
+                              : p.transaction_method === "escrow"
+                              ? "• Rekber Saja"
+                              : "• COD & Rekber"}
+                          </span>
+                        )}
                       </div>
                     </TableCell>
 

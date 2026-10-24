@@ -25,15 +25,20 @@ Modern, responsive backoffice and admin control panel for the **bekasAja** secon
    - Modal pratinjau gambar zoom untuk KTP (`id_card_url`) dan foto selfie (`selfie_url`).
    - Aksi **Verifikasi (Approve)** → mengubah status menjadi `verified` dan `is_verified = true`.
    - Aksi **Tolak (Reject)**.
-5. **Manajemen Banner Promo (`/banners`)**:
-   - CRUD lengkap untuk tabel `banners`.
-   - Color picker visual untuk `gradient_start` dan `gradient_end` disertai **Live Preview Card**.
-   - Pengunggahan gambar ke Supabase Storage (`banners` / `products`) dengan fallback input URL langsung.
-   - Kontrol naik/turun urutan (`sort_order`).
-   - Saklar status aktif / non-aktif.
+5. **Manajemen Banner Marquee Aplikasi (`/banners`)**:
+   - Selaras 100% dengan spesifikasi **Banner Marquee Kontinu Berjalan** di Flutter `bekas_app` (280px × 88px, background foto asli, dark overlay 50%, teks putih, tombol amber `#FFB020` dengan ikon panah).
+   - **Live Ticker Continuous Running Preview**: Pratinjau animasi bergerak langsung di web dengan tombol play/pause dan jeda saat hover.
+   - **5 Preset Cepat Bawaan Aplikasi**: Tombol 1-klik untuk menerapkan promo Gadget, Laptop, Thrift Sneakers, COD Aman, dan Diskon BU.
+   - Input tautan eksternal (`action_url`) disertai tombol **Uji Tautan**.
+   - Pengunggahan gambar ke Supabase Storage (`banners` / `product-images`) atau URL langsung.
+   - Kontrol naik/turun urutan (`sort_order`) dan saklar status aktif.
 6. **Transaksi & Escrow Rekening Bersama (`/orders`)**:
    - Tabel gabungan `orders` + `escrow_transactions` + `products` + pembeli/penjual.
+   - Status terpadu: `waiting_payment`, `waiting_cod`, `paid_in_escrow`, `shipping`, `completed`, `cancelled`.
    - Status pembayaran Xendit dan link tautan langsung ke invoice pembayaran (`xendit_payment_url`).
+7. **Pengaturan Sistem & Sinkronisasi Aplikasi (`/settings`)**:
+   - Pusat kontrol integrasi antara panel web dan aplikasi mobile Flutter.
+   - Verifikasi parameter Marquee, 8 Kategori resmi marketplace, alur transaksi COD/Rekber, dan uji latensi realtime Supabase.
 
 ---
 

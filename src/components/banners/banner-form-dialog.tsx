@@ -1,34 +1,39 @@
 "use client";
 
 import * as React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Banner } from "@/lib/types";
+import {
+  Banner,
+  APP_CATEGORIES,
+  MARQUEE_BANNER_PRESETS,
+  MarqueePreset,
+} from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/toast";
-import { Upload, Sparkles, Image as ImageIcon } from "lucide-react";
+import {
+  Upload,
+  Sparkles,
+  ExternalLink,
+  ArrowRight,
+  Sliders,
+  CheckCircle2,
+  Info,
+} from "lucide-react";
 
 interface BannerFormDialogProps {
   banner: Banner | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: (savedBanner: Banner) => void;
-}
-
-function hexToRgba(hex: string, alpha = 0.75): string {
-  let clean = (hex || "").replace("#", "").trim();
-  if (clean.length === 3) {
-    clean = clean.split("").map((c) => c + c).join("");
-  }
-  if (clean.length === 6) {
-    const num = parseInt(clean, 16);
-    const r = (num >> 16) & 255;
-    const g = (num >> 8) & 255;
-    const b = num & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-  return hex;
 }
 
 export function BannerFormDialog({
@@ -71,10 +76,10 @@ export function BannerFormDialog({
       setIsActive(banner.is_active ?? true);
       setSortOrder(banner.sort_order ?? 0);
     } else {
-      setTag("PROMO SPESIAL");
+      setTag("PROMO GADGET");
       setTitle("");
       setSubtitle("");
-      setButtonText("Lihat Promo");
+      setButtonText("Cek Promo");
       setTargetCategory("all");
       setActionUrl("");
       setGradientStart("#00C853");
@@ -85,6 +90,18 @@ export function BannerFormDialog({
     }
     setError(null);
   }, [banner, open]);
+
+  // Apply one of the 5 official Marquee presets from the app
+  const applyPreset = (preset: MarqueePreset) => {
+    setTag(preset.tag);
+    setTitle(preset.title);
+    setSubtitle(preset.subtitle);
+    setButtonText(preset.btn);
+    setActionUrl(preset.url);
+    setImageUrl(preset.image);
+    setTargetCategory(preset.targetCategory);
+    toast(`Preset "${preset.label}" berhasil diterapkan!`, "info");
+  };
 
   // Handle Supabase Storage upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +116,7 @@ export function BannerFormDialog({
       const fileName = `banner-${Date.now()}.${fileExt}`;
       const filePath = `banners/${fileName}`;
 
-      // Coba upload ke bucket 'banners', jika belum ada fallback ke 'product-images'
+      // Buckets to try in order
       const bucketsToTry = ["banners", "product-images", "avatars"];
       let uploadSuccess = false;
       let usedBucket = "banners";
@@ -120,7 +137,7 @@ export function BannerFormDialog({
 
       if (!uploadSuccess) {
         throw new Error(
-          "Bucket storage ('banners' atau 'product-images') belum dibuat di Supabase Storage. Buat bucket 'banners' di Supabase atau masukkan URL gambar secara manual."
+          "Bucket storage belum tersedia. Pastikan bucket 'banners' atau 'product-images' sudah dibuat di Supabase, atau masukkan tautan URL foto langsung."
         );
       }
 
@@ -129,11 +146,11 @@ export function BannerFormDialog({
         .getPublicUrl(uploadPath);
 
       setImageUrl(urlData.publicUrl);
-      toast(`Gambar banner berhasil diunggah ke storage '${usedBucket}'!`, "success");
+      toast(`Foto banner berhasil diunggah ke storage '${usedBucket}'!`, "success");
     } catch (err: unknown) {
       setError(
         `Upload gagal: ${
-          err instanceof Error ? err.message : "Coba masukkan URL gambar secara manual."
+          err instanceof Error ? err.message : "Coba masukkan tautan URL gambar secara manual."
         }`
       );
     } finally {
@@ -141,10 +158,27 @@ export function BannerFormDialog({
     }
   };
 
+  const handleTestLink = () => {
+    if (!actionUrl.trim()) {
+      toast("Masukkan tautan URL terlebih dahulu.", "info");
+      return;
+    }
+    try {
+      window.open(actionUrl.trim(), "_blank", "noopener,noreferrer");
+    } catch {
+      toast("Format URL tidak valid.", "error");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !subtitle.trim() || !tag.trim()) {
-      setError("Judul, Subtitle, dan Tag banner wajib diisi.");
+    if (!title.trim() || !subtitle.trim()) {
+      setError("Judul dan Subtitle banner wajib diisi.");
+      return;
+    }
+
+    if (!imageUrl.trim()) {
+      setError("Foto latar banner (Image URL) wajib diisi sesuai format Marquee aplikasi.");
       return;
     }
 
@@ -153,11 +187,11 @@ export function BannerFormDialog({
 
     try {
       const payload = {
-        tag: tag.trim(),
+        tag: tag.trim() || "PROMO",
         title: title.trim(),
         subtitle: subtitle.trim(),
-        button_text: buttonText.trim(),
-        target_category: targetCategory.trim(),
+        button_text: buttonText.trim() || "Lihat Promo",
+        target_category: targetCategory.trim() || "all",
         action_url: actionUrl.trim() || null,
         gradient_start: gradientStart,
         gradient_end: gradientEnd,
@@ -176,7 +210,7 @@ export function BannerFormDialog({
           .single();
 
         if (updateError) throw updateError;
-        toast("Banner promo berhasil diperbarui!", "success");
+        toast("Banner Marquee berhasil diperbarui!", "success");
         onSuccess(data as Banner);
       } else {
         const { data, error: insertError } = await supabase
@@ -186,7 +220,7 @@ export function BannerFormDialog({
           .single();
 
         if (insertError) throw insertError;
-        toast("Banner promo baru berhasil ditambahkan!", "success");
+        toast("Banner Marquee baru berhasil ditambahkan!", "success");
         onSuccess(data as Banner);
       }
       onOpenChange(false);
@@ -199,87 +233,147 @@ export function BannerFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent maxWidth="max-w-2xl" onClose={() => onOpenChange(false)}>
-        <form onSubmit={handleSubmit}>
+      <DialogContent maxWidth="max-w-3xl" onClose={() => onOpenChange(false)}>
+        <form onSubmit={handleSubmit} className="flex flex-col max-h-[85vh]">
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Edit Banner Promo" : "Tambah Banner Promo Baru"}
-            </DialogTitle>
-            <DialogDescription>
-              Atur tampilan kartu promosi yang tampil di slider beranda aplikasi.
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                <Sliders className="h-4 w-4" />
+              </span>
+              <div>
+                <DialogTitle>
+                  {isEditing ? "Edit Banner Marquee Aplikasi" : "Tambah Banner Marquee Baru"}
+                </DialogTitle>
+                <DialogDescription>
+                  Format banner kontinu 280×88px dengan background foto asli dan overlay gelap 50%.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
           {error && (
-            <div className="mb-4 rounded-lg bg-rose-50 p-3 text-xs text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+            <div className="my-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-300">
               {error}
             </div>
           )}
 
-          {/* Live Preview Card */}
-          <div className="my-4">
-            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-              Pratinjau Tampilan (Live Preview)
-            </label>
-            <div
-              className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lg transition-all min-h-[140px]"
-              style={
-                !imageUrl
-                  ? {
-                      background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
-                    }
-                  : undefined
-              }
-            >
-              {imageUrl && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* Quick Presets Bar */}
+          <div className="my-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+            <div className="flex items-center justify-between mb-2">
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                Pilih Preset Cepat (Format Resmi Aplikasi):
+              </span>
+              <span className="text-[11px] text-slate-400">1-Klik Langsung Isi Form</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {MARQUEE_BANNER_PRESETS.map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => applyPreset(p)}
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-500 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300 transition-colors"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* LIVE PREVIEW BANNER MARQUEE (Exact 280x88px Ratio & Styling) */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Pratinjau Akurat Marquee Berjalan (280px × 88px)
+              </label>
+              <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-3 w-3" />
+                Identik dengan Tampilan di Aplikasi Flutter
+              </span>
+            </div>
+
+            <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-100/80 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+              {/* Exact Card Preview */}
+              <div
+                className="relative overflow-hidden shadow-md select-none transition-all"
+                style={{
+                  width: "280px",
+                  height: "88px",
+                  borderRadius: "16px",
+                  backgroundColor: "#1e293b",
+                }}
+              >
+                {/* 1. Background Photo */}
+                {imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imageUrl}
-                    alt="Banner Preview"
+                    alt={title || "Banner Preview"}
                     className="absolute inset-0 h-full w-full object-cover"
                   />
-                  {/* Overlay gradient 0.75 opacity */}
+                ) : (
                   <div
-                    className="absolute inset-0"
+                    className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-400"
                     style={{
-                      background: `linear-gradient(135deg, ${hexToRgba(gradientStart || "#00c853", 0.75)}, ${hexToRgba(gradientEnd || "#009624", 0.75)})`,
+                      background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
                     }}
-                  />
-                </>
-              )}
+                  >
+                    <span>Masukkan URL Foto Latar</span>
+                  </div>
+                )}
 
-              <div className="relative z-10 flex items-start justify-between gap-4">
-                <div className="space-y-1.5 max-w-sm">
-                  <span className="inline-block rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-sm border border-white/20">
-                    {tag || "PROMO SPESIAL"}
-                  </span>
-                  <h4 className="text-xl font-bold tracking-tight drop-shadow-sm">
-                    {title || "Judul Banner Promosi"}
-                  </h4>
-                  <p className="text-xs text-white/95 leading-relaxed drop-shadow-xs">
-                    {subtitle || "Dapatkan potongan harga dan penawaran terbaik untuk gadget pilihanmu."}
-                  </p>
-                  <div className="pt-2">
-                    <span className="inline-block rounded-lg bg-white px-3.5 py-1.5 text-xs font-bold text-slate-900 shadow-sm">
-                      {buttonText || "Lihat Promo"}
-                    </span>
+                {/* 2. Dark Overlay 50% */}
+                <div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+                />
+
+                {/* 3. Content: Left Text + Right Amber Button */}
+                <div className="relative z-10 flex h-full w-full items-center justify-between p-[12px] text-white">
+                  {/* Left Column: Title & Subtitle */}
+                  <div className="flex flex-col justify-center min-w-0 pr-2">
+                    <p
+                      className="text-[15px] font-bold text-white leading-tight truncate drop-shadow-sm"
+                      style={{ letterSpacing: "-0.2px" }}
+                    >
+                      {title || "Judul Banner Marquee"}
+                    </p>
+                    <p
+                      className="text-[12px] text-white/85 line-clamp-2 leading-[1.25] mt-1 drop-shadow-xs"
+                    >
+                      {subtitle || "Kondisi mulus 99%, siap pakai & negosiasi aman."}
+                    </p>
+                  </div>
+
+                  {/* Right Button: Amber #FFB020, black text, arrow icon */}
+                  <div className="shrink-0 self-end">
+                    <div
+                      className="flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[11px] font-bold shadow-sm"
+                      style={{
+                        backgroundColor: "#FFB020",
+                        color: "#000000",
+                      }}
+                    >
+                      <span>{buttonText || "Lihat Promo"}</span>
+                      <ArrowRight className="h-3 w-3 stroke-[2.5]" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+          {/* Form Scrollable Fields */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {/* Tag & Category */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Tag Banner <span className="text-rose-500">*</span>
+                  Tag / Label Banner
                 </label>
                 <Input
                   required
-                  placeholder="Contoh: CASHBACK 50%, TERLARIS"
+                  placeholder="Contoh: PROMO GADGET, BUTUH UANG"
                   value={tag}
                   onChange={(e) => setTag(e.target.value)}
                   className="mt-1 text-xs"
@@ -288,19 +382,18 @@ export function BannerFormDialog({
 
               <div>
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Target Kategori
+                  Target Kategori Aplikasi <span className="text-emerald-500 font-normal">(8 Kategori Resmi)</span>
                 </label>
                 <select
                   value={targetCategory}
                   onChange={(e) => setTargetCategory(e.target.value)}
-                  className="mt-1 flex h-9 w-full rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                  className="mt-1 flex h-9 w-full rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs shadow-2xs dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <option value="all">Semua Kategori (all)</option>
-                  <option value="smartphone">Smartphone</option>
-                  <option value="laptop">Laptop & Komputer</option>
-                  <option value="kamera">Kamera & Fotografi</option>
-                  <option value="audio">Audio & Speaker</option>
-                  <option value="aksesoris">Aksesoris</option>
+                  {APP_CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name} ({cat.id})
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -308,11 +401,12 @@ export function BannerFormDialog({
             {/* Title & Subtitle */}
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Judul Utama <span className="text-rose-500">*</span>
+                Judul Banner (Tebal, 15px, 1 Baris) <span className="text-rose-500">*</span>
               </label>
               <Input
                 required
-                placeholder="Contoh: Upgrade Gadget Impianmu Hari Ini"
+                maxLength={45}
+                placeholder="Contoh: Gadget & iPhone Bekas Mulus"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="mt-1 text-xs"
@@ -321,25 +415,27 @@ export function BannerFormDialog({
 
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Sub Judul / Keterangan <span className="text-rose-500">*</span>
+                Sub Judul (12px, Maksimal 2 Baris) <span className="text-rose-500">*</span>
               </label>
               <Input
                 required
-                placeholder="Contoh: Garansi resmi, siap kirim dengan escrow terjamin."
+                maxLength={90}
+                placeholder="Contoh: Kondisi mulus 99%, baterai awet & siap pakai langsung"
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 className="mt-1 text-xs"
               />
             </div>
 
-            {/* Button text & Action URL */}
+            {/* Button text & Sort order */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Teks Tombol
+                  Teks Tombol Amber (Kanan Bawah)
                 </label>
                 <Input
-                  placeholder="Lihat Promo"
+                  required
+                  placeholder="Cek Promo"
                   value={buttonText}
                   onChange={(e) => setButtonText(e.target.value)}
                   className="mt-1 text-xs"
@@ -348,7 +444,7 @@ export function BannerFormDialog({
 
               <div>
                 <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Urutan Tampil (Sort Order)
+                  Urutan Marquee (Sort Order)
                 </label>
                 <Input
                   type="number"
@@ -359,55 +455,41 @@ export function BannerFormDialog({
               </div>
             </div>
 
-            {/* Color Pickers for Gradient */}
-            <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/50">
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Warna Awal (Gradient Start)
-                </label>
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="color"
-                    value={gradientStart}
-                    onChange={(e) => setGradientStart(e.target.value)}
-                    className="h-8 w-12 rounded cursor-pointer border border-slate-300 bg-transparent"
-                  />
-                  <Input
-                    value={gradientStart}
-                    onChange={(e) => setGradientStart(e.target.value)}
-                    className="text-xs font-mono uppercase h-8"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Warna Akhir (Gradient End)
-                </label>
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="color"
-                    value={gradientEnd}
-                    onChange={(e) => setGradientEnd(e.target.value)}
-                    className="h-8 w-12 rounded cursor-pointer border border-slate-300 bg-transparent"
-                  />
-                  <Input
-                    value={gradientEnd}
-                    onChange={(e) => setGradientEnd(e.target.value)}
-                    className="text-xs font-mono uppercase h-8"
-                  />
-                </div>
+            {/* Action / Link URL */}
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Tautan Aksi / Link URL (Membuka via Browser di Aplikasi)
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  placeholder="https://bekasaja.id/promo/gadget"
+                  value={actionUrl}
+                  onChange={(e) => setActionUrl(e.target.value)}
+                  className="text-xs flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestLink}
+                  className="gap-1 text-xs shrink-0"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  <span>Uji Tautan</span>
+                </Button>
               </div>
             </div>
 
-            {/* Image Upload / URL */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Gambar Banner (Unggah / URL)
+            {/* Mandatory Background Image URL */}
+            <div className="space-y-1.5">
+              <label className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <span>Foto Latar Banner (Wajib Foto Asli) <span className="text-rose-500">*</span></span>
+                <span className="text-[11px] text-slate-400 font-normal">Mendukung Unsplash & Supabase Storage</span>
               </label>
               <div className="flex items-center gap-2">
                 <Input
-                  placeholder="https://... atau klik tombol unggah"
+                  required
+                  placeholder="https://images.unsplash.com/... atau klik tombol Unggah"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   className="text-xs flex-1"
@@ -422,7 +504,7 @@ export function BannerFormDialog({
                     onClick={() => document.getElementById("banner-file-input")?.click()}
                   >
                     <Upload className="h-3.5 w-3.5" />
-                    <span>Upload Foto</span>
+                    <span>Unggah File</span>
                   </Button>
                   <input
                     id="banner-file-input"
@@ -435,15 +517,18 @@ export function BannerFormDialog({
               </div>
             </div>
 
-            {/* Active toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3 dark:border-slate-800">
-              <div>
-                <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                  Status Banner Aktif
-                </p>
-                <p className="text-[11px] text-slate-400">
-                  Jika aktif, banner akan tampil di carousel aplikasi
-                </p>
+            {/* Active Toggle & Specifications Notice */}
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3.5 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex items-start gap-2.5">
+                <Info className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Status Tayang di Marquee Berjalan
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Banner aktif akan otomatis masuk ke pita bergerak infinite di beranda aplikasi Flutter.
+                  </p>
+                </div>
               </div>
               <input
                 type="checkbox"
@@ -454,7 +539,7 @@ export function BannerFormDialog({
             </div>
           </div>
 
-          <DialogFooter className="mt-4">
+          <DialogFooter className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
             <Button
               type="button"
               variant="outline"
@@ -468,7 +553,7 @@ export function BannerFormDialog({
               className="bg-emerald-600 hover:bg-emerald-700"
               isLoading={submitting}
             >
-              {isEditing ? "Simpan Perubahan" : "Tambah Banner"}
+              {isEditing ? "Simpan Perubahan Banner" : "Tambahkan ke Marquee Aplikasi"}
             </Button>
           </DialogFooter>
         </form>

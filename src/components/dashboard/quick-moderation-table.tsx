@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Product } from "@/lib/types";
+import { Product, getCategoryName } from "@/lib/types";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -185,8 +185,8 @@ export function QuickModerationTable({
                       </div>
                     </td>
                     <td className="p-4">
-                      <Badge variant="secondary" className="capitalize">
-                        {prod.category}
+                      <Badge variant="secondary">
+                        {getCategoryName(prod.category)}
                       </Badge>
                     </td>
                     <td className="p-4 font-semibold text-emerald-600 dark:text-emerald-400">

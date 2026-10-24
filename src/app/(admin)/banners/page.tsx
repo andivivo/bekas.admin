@@ -17,10 +17,10 @@ export default async function BannersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Manajemen Banner Promosi
+          Manajemen Banner Marquee Aplikasi
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Atur banner promosi, gradien warna, gambar, dan urutan slider beranda aplikasi bekasAja.
+          Kelola banner promosi bergerak (Marquee 280×88px dengan background foto asli dan overlay 50%) untuk beranda aplikasi bekasAja.
         </p>
       </div>
 
